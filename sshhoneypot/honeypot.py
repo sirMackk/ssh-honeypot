@@ -5,12 +5,12 @@ import sys
 
 import asyncssh
 
+from sshhoneypot import __version__
+
 DEFAULT_SSH_BANNER = 'OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.8'
 
-__version__ = '0.0.1'
 
-
-class HoneyPotServer(asyncssh.SSHServer):
+class HoneypotServer(asyncssh.SSHServer):
     def __init__(self, *args, **kwargs):
         self._log = kwargs['logger']
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
 
     host = args.host
     port = args.port
-    server_factory = HoneyPotFactory(args, HoneyPotServer)
+    server_factory = HoneyPotFactory(args, HoneypotServer)
 
     loop = asyncio.get_event_loop()
     try:

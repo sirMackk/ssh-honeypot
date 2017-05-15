@@ -1,1 +1,4 @@
 .todo
+.tox
+*.egg-info/
+*.pyc
