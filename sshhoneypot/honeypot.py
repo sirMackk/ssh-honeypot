@@ -11,8 +11,8 @@ DEFAULT_SSH_BANNER = 'OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.8'
 
 
 class HoneypotServer(asyncssh.SSHServer):
-    def __init__(self, *args, **kwargs):
-        self._log = kwargs['logger']
+    def __init__(self, *args, logger=None, **kwargs):
+        self._log = logger
 
     def connection_made(self, conn):
         self._log.info('Got connection!')
