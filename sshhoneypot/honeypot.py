@@ -13,35 +13,42 @@ DEFAULT_SSH_BANNER = 'OpenSSH_6.6.1p1 Ubuntu-2ubuntu2.8'
 class HoneypotServer(asyncssh.SSHServer):
     def __init__(self, *args, logger=None, **kwargs):
         self._log = logger
+        self._peer_ip = None
+        self._peer_port = None
 
     def connection_made(self, conn):
-        self._log.info('Got connection!')
+        self._peer_ip, self._peer_port = conn.get_extra_info('peername')
+        self._log('[{ip}:{port}] Established connection'.format(
+            ip=self._peer_ip, port=self._peer_port))
         self.conn = conn
 
     def begin_auth(self, username):
-        self._log.info('Getting connection!')
         # Accept authentication for ANY username
         return True
 
     def validate_password(self, username, password):
         # Always validate password as false
-        ip, port = self.conn.get_extra_info('peername')
         client_version = self.conn.get_extra_info('client_version')
-        self._log.info('LOG IN ATTEMPT: {username}@{ip}:{port}, password: {password}, client: {client_v}'.format(
-            username=username,
-            password=password,
-            ip=ip,
-            port=port,
-            client_v=client_version))
+        self._log('[{ip}:{port}] Log-in attempt from "{username}" with '
+                  '"{password}", using "{client_v}"'.format(
+                    username=username,
+                    password=password,
+                    ip=self._peer_ip,
+                    port=self._peer_port,
+                    client_v=client_version))
         return False
 
     def password_auth_supported(self):
         return True
 
     def connection_lost(self, exc):
-        self._log.info('Connection closed')
-        if exc is not None:
-            self._log.info('Connection lost - {0}'.format(exc))
+        if exc is None:
+            self._log('[{ip}:{port}] Connection closed'.format(
+                ip=self._peer_ip, port=self._peer_port))
+        else:
+            self._log('[{ip}:{port}] Connection lost, reason: {exc}'.format(
+                ip=self._peer_ip, port=self._peer_port, exc=exc))
+
 
 
 class HoneyPotFactory:
